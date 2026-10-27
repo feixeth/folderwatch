@@ -1,0 +1,63 @@
+{
+	"name": "folderwatch",
+	"version": "1.0.1",
+	"private": true,
+	"description": "Per-folder alerts (notification and e-mail) for Nextcloud",
+	"license": "AGPL-3.0-or-later",
+	"author": {
+		"name": "ZEDD",
+		"url": "https://zedd.fr"
+	},
+	"homepage": "https://github.com/feixeth/folderwatch",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/feixeth/folderwatch.git"
+	},
+	"bugs": {
+		"url": "https://github.com/feixeth/folderwatch/issues"
+	},
+	"type": "module",
+	"engines": {
+		"node": "^20.11.0 || ^22 || ^24",
+		"npm": "^10 || ^11"
+	},
+	"scripts": {
+		"build": "vite build",
+		"dev": "vite build --mode development",
+		"watch": "vite build --mode development --watch",
+		"typecheck": "vue-tsc --noEmit",
+		"test": "vitest run",
+		"lint": "eslint src tests-js"
+	},
+	"dependencies": {
+		"@nextcloud/auth": "^2.5.0",
+		"@nextcloud/axios": "^2.6.0",
+		"@nextcloud/dialogs": "^7.5.0",
+		"@nextcloud/event-bus": "^3.3.0",
+		"@nextcloud/files": "^4.1.1",
+		"@nextcloud/initial-state": "^3.0.0",
+		"@nextcloud/l10n": "^3.4.1",
+		"@nextcloud/router": "^3.2.0",
+		"@nextcloud/vue": "^9.14.0",
+		"vue": "^3.5.44",
+		"vue-material-design-icons": "^5.3.1"
+	},
+	"devDependencies": {
+		"@nextcloud/browserslist-config": "^3.1.0",
+		"@nextcloud/eslint-config": "^9.0.1",
+		"@nextcloud/vite-config": "^2.5.4",
+		"@vue/test-utils": "^2.4.6",
+		"eslint": "^9.39.5",
+		"jsdom": "^26.0.0",
+		"puppeteer-core": "^24.43.1",
+		"sass": "^1.89.0",
+		"typescript": "^5.9.0",
+		"vite": "^7.3.6",
+		"vitest": "^3.2.0",
+		"vue-eslint-parser": "^10.4.1",
+		"vue-tsc": "^3.0.0"
+	},
+	"browserslist": [
+		"extends @nextcloud/browserslist-config"
+	]
+}

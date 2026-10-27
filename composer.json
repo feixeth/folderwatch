@@ -1,0 +1,53 @@
+{
+	"name": "zedd/folderwatch",
+	"description": "Per-folder alerts (notification and e-mail) for Nextcloud",
+	"type": "project",
+	"license": "AGPL-3.0-or-later",
+	"homepage": "https://github.com/feixeth/folderwatch",
+	"support": {
+		"issues": "https://github.com/feixeth/folderwatch/issues",
+		"source": "https://github.com/feixeth/folderwatch"
+	},
+	"authors": [
+		{
+			"name": "ZEDD",
+			"homepage": "https://zedd.fr"
+		}
+	],
+	"require": {
+		"php": ">=8.2"
+	},
+	"require-dev": {
+		"nextcloud/coding-standard": "^1.5",
+		"nextcloud/ocp": "dev-stable35",
+		"nextcloud/openapi-extractor": "^1.9",
+		"phpunit/phpunit": "^10.5",
+		"symfony/console": "^7.0",
+		"vimeo/psalm": "^6.20"
+	},
+	"autoload": {
+		"psr-4": {
+			"OCA\\FolderWatch\\": "lib/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"OCA\\FolderWatch\\Tests\\": "tests/"
+		},
+		"exclude-from-classmap": [
+			"tests/stubs/"
+		]
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"sort-packages": true,
+		"platform": {
+			"php": "8.3.16"
+		}
+	},
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"scripts": {
+		"test:unit": "phpunit -c tests/phpunit.xml --testsuite unit"
+	}
+}

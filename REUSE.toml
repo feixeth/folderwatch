@@ -1,0 +1,14 @@
+version = 1
+SPDX-PackageName = "folderwatch"
+SPDX-PackageSupplier = "ZEDD"
+
+[[annotations]]
+path = [
+	"composer.json", "composer.lock", "package.json", "package-lock.json", "tsconfig.json",
+	".gitignore", ".npmrc", "Makefile", "docker-compose.dev.yml", "psalm.xml",
+	"l10n/**", "img/**", "openapi*.json", "*.md", "tests/phpunit*.xml", "tests/integration.sh",
+	"templates/**", "tools/dev-php.ini",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 ZEDD"
+SPDX-License-Identifier = "AGPL-3.0-or-later"

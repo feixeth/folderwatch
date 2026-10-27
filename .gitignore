@@ -1,0 +1,9 @@
+/vendor/
+/node_modules/
+/js/
+/build/
+/.phpunit.cache/
+/.php-cs-fixer.cache
+.DS_Store
+*.log
+/tests/.phpunit.result.cache

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+  - SPDX-FileCopyrightText: 2026 ZEDD
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<psalm
+	errorLevel="3"
+	findUnusedBaselineEntry="true"
+	findUnusedCode="false"
+	phpVersion="8.2"
+	resolveFromConfigFile="true"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="https://getpsalm.org/schema/config"
+	xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+	<projectFiles>
+		<directory name="lib" />
+		<ignoreFiles>
+			<directory name="vendor" />
+		</ignoreFiles>
+	</projectFiles>
+	<extraFiles>
+		<directory name="vendor/nextcloud/ocp" />
+	</extraFiles>
+	<stubs>
+		<file name="tests/stubs/LoadAdditionalScriptsEvent.php" />
+	</stubs>
+	<issueHandlers>
+		<!-- #[\Override] needs PHP 8.3, the app supports 8.2; entities and controllers are extended by the framework -->
+		<MissingOverrideAttribute errorLevel="suppress" />
+		<ClassMustBeFinal errorLevel="suppress" />
+	</issueHandlers>
+</psalm>
