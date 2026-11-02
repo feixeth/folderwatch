@@ -9,6 +9,19 @@ All notable changes to Folder Watch are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## 1.0.2 - 2026-11-02
+
+Presentation only: no change to the code of the app.
+
+### Changed
+
+- App Store listing improvements: new screenshots (personal settings with four watched folders as the first one,
+  the "Watch this folder" action, a grouped notification, the e-mail, the administration page), declared with public
+  URLs; a longer description with features, how it works and requirements, in English and French; links to the
+  README, the issues and this changelog; documentation links for users and administrators, and the project website.
+- Screenshots in `screenshots/en` and `screenshots/fr` are regenerated from a new demo scene
+  (`tools/seed-demo.sh`, `tools/screenshots.mjs`) with neutral data and no local address visible.
+
 ## 1.0.1 - 2026-10-27
 
 Initial release.
