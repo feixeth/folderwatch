@@ -11,7 +11,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## 1.0.2 - 2026-11-02
 
-Presentation only: no change to the code of the app.
+### Fixed
+
+- French: the frequency selector cut its longest label ("Récapitulatif tout…les heures"). The label is now
+  "Récapitulatif horaire", and a unit test keeps the frequency labels short enough for the selector, which is only as
+  wide as a column of the settings page. Checked in English and French from 320 px to 1280 px wide.
 
 ### Changed
 
@@ -19,6 +23,8 @@ Presentation only: no change to the code of the app.
   the "Watch this folder" action, a grouped notification, the e-mail, the administration page), declared with public
   URLs; a longer description with features, how it works and requirements, in English and French; links to the
   README, the issues and this changelog; documentation links for users and administrators, and the project website.
+- `README.md` is now the English version, with the English screenshots; the French version is `README.fr.md`, with
+  the French screenshots. Each links to the other.
 - Screenshots in `screenshots/en` and `screenshots/fr` are regenerated from a new demo scene
   (`tools/seed-demo.sh`, `tools/screenshots.mjs`) with neutral data and no local address visible.
 

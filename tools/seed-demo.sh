@@ -82,7 +82,7 @@ dav bob -X MKCOL "$DAV/bob/$(q "$PHOTOS")" >/dev/null
 share bob "$PHOTOS" alice
 
 # four watches, with different settings
-occ folderwatch:add alice "/$INVOICES" --no-recursive --events=created --frequency=daily --digest-hour=8 --channel=mail >/dev/null
+occ folderwatch:add alice "/$INVOICES" --no-recursive --events=created --frequency=hourly --channel=mail >/dev/null
 occ folderwatch:add alice "/$TOPROCESS" >/dev/null
 occ folderwatch:add alice "/$CONTRACTS" --events=created,modified,deleted --frequency=daily --digest-hour=17 >/dev/null
 occ folderwatch:add alice "/$PHOTOS" --events=created --channel=notification >/dev/null

@@ -3,303 +3,302 @@
   - SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 
-# Folder Watch — Surveillance de dossiers
+# Folder Watch
 
-Une application [Nextcloud](https://nextcloud.com) qui prévient chaque utilisateur quand un fichier ou un
-sous-dossier est **ajouté, modifié, supprimé ou déplacé** dans les dossiers qu'il a choisi de surveiller :
-par **notification Nextcloud**, par **e-mail**, ou les deux.
+[Version française](README.fr.md)
 
-- id `folderwatch`, espace de noms `OCA\FolderWatch`, licence AGPL-3.0-or-later, éditeur ZEDD
-- Nextcloud **33 à 36**, PHP **8.2+**, uniquement des API publiques (`OCP\`). Testé de bout en bout sur
-  Nextcloud **35.0.2** et **33.0.10** (la 36 n'est pas encore sortie : la borne est déclarée, pas éprouvée) ;
-  le code est vérifié syntaxiquement et par Psalm pour PHP 8.2, exécuté sous PHP 8.4 et 8.5
-- interface en français et en anglais
-- dépôt et suivi des problèmes : <https://github.com/feixeth/folderwatch>
+A [Nextcloud](https://nextcloud.com) app that tells each user when a file or sub-folder is **added, modified,
+removed or moved** into the folders they chose to watch: by **Nextcloud notification**, by **e-mail**, or both.
 
-| Dans Fichiers | Paramètres personnels |
+- id `folderwatch`, namespace `OCA\FolderWatch`, licence AGPL-3.0-or-later, publisher ZEDD
+- Nextcloud **33 to 36**, PHP **8.2+**, public APIs only (`OCP\`). Tested end to end on Nextcloud **35.0.2** and
+  **33.0.10** (36 is not released yet: the upper bound is declared, not proven); the code is checked by Psalm for
+  PHP 8.2 and runs on PHP 8.4 and 8.5
+- English and French interface
+- source and issue tracker: <https://github.com/feixeth/folderwatch>
+
+<p align="center">
+  <img src="screenshots/en/personal-settings.png" alt="Personal settings: four watched folders, each with its own settings" width="560">
+</p>
+
+| In Files | Grouped notification |
 |---|---|
-| ![Menu « Surveiller ce dossier »](screenshots/fr/files-action.png) | ![Paramètres personnels](screenshots/fr/personal-settings.png) |
+| ![The "Watch this folder" menu entry](screenshots/en/files-action.png) | ![A grouped notification](screenshots/en/notifications.png) |
 
-| Notification | E-mail |
+| E-mail | Administration |
 |---|---|
-| ![Notification groupée](screenshots/fr/notifications.png) | ![E-mail](screenshots/fr/mail.png) |
+| ![The e-mail](screenshots/en/mail.png) | ![Administration settings](screenshots/en/admin-settings.png) |
 
-## Pourquoi
+## Why
 
-Les solutions existantes ne conviennent pas : *Flow Notifications + tags* est peu intuitif, n'envoie le mail
-qu'indirectement et ne maîtrise pas son contenu ; *Mail Notifier* n'est plus maintenu ; *Webhook Listeners* est
-une brique bas niveau sans interface. Folder Watch fait une seule chose, avec une interface pour les
-utilisateurs, des réglages pour l'administrateur et des commandes `occ` pour la mise en place.
+The existing options do not fit: *Flow Notifications + tags* is not intuitive, sends the mail only indirectly and
+gives no control over its content; *Mail Notifier* is no longer maintained; *Webhook Listeners* is a low-level
+building block without an interface. Folder Watch does one thing, with an interface for users, settings for the
+administrator and `occ` commands for set-up.
 
-## Ce que voit l'utilisateur
+## What users see
 
-**Choisir les dossiers.** Dans Fichiers, le menu d'un dossier propose « Surveiller ce dossier » / « Ne plus
-surveiller » ; un œil marque les dossiers surveillés (un clic ouvre les réglages). Dans *Paramètres personnels →
-Surveillance de dossiers*, on ajoute un dossier avec le sélecteur de fichiers et on règle, **pour chaque
-dossier** :
+**Choosing folders.** In Files, the menu of a folder offers "Watch this folder" / "Stop watching", and an eye marks
+the watched folders (a click opens their settings). In *Personal settings → Folder Watch*, a folder is added with
+the file picker and set up, **folder by folder**:
 
-| Réglage | Choix | Défaut |
+| Setting | Choices | Default |
 |---|---|---|
-| Sous-dossiers | inclus ou non | inclus |
-| Événements | ajouté, modifié, supprimé, déplacé ici | ajouté + déplacé ici |
-| Canal | notification, e-mail, ou les deux | les deux |
-| Fréquence | dès que possible, récapitulatif horaire, récapitulatif quotidien (heure au choix) | dès que possible |
+| Sub-folders | included or not | included |
+| Events | added, modified, removed, moved in | added + moved in |
+| Channel | notification, e-mail, or both | both |
+| Frequency | as soon as possible, hourly digest, daily digest (at the hour you pick) | as soon as possible |
 
-Une option globale « Ignorer mes propres actions » est activée par défaut. Les réglages s'enregistrent
-immédiatement.
+A global "Ignore my own actions" option is on by default. Settings are saved as soon as they change.
 
-**Recevoir l'alerte.** Une notification et un e-mail **par dossier et par lot**, jamais un par fichier :
+**Receiving the alert.** One notification and one e-mail **per folder and per batch**, never one per file:
 
-- « 3 nouveaux éléments dans À traiter par Alice », « Alice a ajouté rapport.pdf dans À traiter »,
-  « 2 éléments supprimés de Factures par Bob »… avec le détail « 2 ajoutés, 1 modifié » quand le lot est mixte ;
-- le bouton « Ouvrir » mène au fichier s'il est seul, au dossier sinon ;
-- l'e-mail utilise le gabarit natif de Nextcloud (thème de l'instance), dans la langue de l'utilisateur :
-  nom, auteur, date et lien de chaque élément, **50 au plus** puis « … et N autres éléments ».
-  **Il ne contient jamais le contenu des fichiers**, seulement des noms et des liens qui demandent une
-  authentification.
-- sans adresse e-mail sur le compte, aucun mail n'est envoyé (trace en debug) et la notification part quand même ;
-- **le canal e-mail est grisé, avec la raison**, dans les paramètres personnels quand il ne peut pas servir : coupé par
-  l'administrateur, serveur e-mail de Nextcloud non configuré, ou pas d'adresse sur le compte. Et un bandeau
-  « Les alertes peuvent arriver en retard » s'affiche quand les tâches de fond ne tournent pas par cron.
+- "3 new items in To process by Alice", "Alice added report.pdf in To process", "2 items removed from Invoices by
+  Bob"... with a detail line such as "2 added, 1 modified" when the batch is mixed;
+- the "Open" button leads to the file when there is only one, to the folder otherwise;
+- the e-mail uses the native Nextcloud template (the theme of the instance), in the language of the recipient: name,
+  author, date and link of each item, **50 at most**, then "... and N more items". **It never contains file
+  contents**, only names and links that require a login;
+- an account without an e-mail address gets no mail (a debug trace is written) and the notification is sent anyway;
+- **the e-mail channel is greyed out, with the reason**, in the personal settings when it cannot be used: switched off
+  by the administrator, Nextcloud e-mail server not configured, or no address on the account. A banner "Alerts may
+  arrive late" appears when background jobs do not run by cron.
 
 ## Installation
 
-### Depuis l'App Store
+### From the App Store
 
-*Administration → Applications*, chercher « Folder Watch » (catégorie *Fichiers*), puis **Télécharger et activer**.
-C'est la voie recommandée : l'archive est vérifiée (signature) et les mises à jour passent par Nextcloud.
-(Tant que l'app n'est pas publiée sur l'App Store, utiliser l'installation manuelle.)
+*Administration → Apps*, search for "Folder Watch" (category *Files*), then **Download and enable**. This is the
+recommended way: the archive is verified (signature) and updates come through Nextcloud. (Until the app is published
+on the App Store, use the manual installation.)
 
-### Installation manuelle
+### Manual installation
 
-1. Récupérer l'archive `folderwatch-<version>.tar.gz` (page des versions du dépôt, ou `make appstore`).
-2. L'extraire dans le dossier des applications de l'instance (`apps/` ou `custom_apps/`, selon `apps_paths` dans
-   `config.php`) **en tant qu'utilisateur PHP de l'instance**, puis activer l'app avec `occ` sous ce même
-   utilisateur.
+1. Get the archive `folderwatch-<version>.tar.gz` (the releases page of the repository, or `make appstore`).
+2. Extract it into the apps folder of the instance (`apps/` or `custom_apps/`, according to `apps_paths` in
+   `config.php`) **as the PHP user of the instance**, then enable the app with `occ` as that same user.
 
-L'**utilisateur PHP** est celui qui exécute PHP pour Nextcloud et possède ses fichiers. Pour le connaître :
-
-```bash
-stat -c %U /chemin/vers/nextcloud/config/config.php      # Linux
-```
-
-C'est `www-data` sur une installation Debian ou Ubuntu standard, `apache` ou `nginx` ailleurs. **Sur un hébergement de
-type Virtualmin ou ISPConfig, c'est l'utilisateur du site** (celui du domaine virtuel, par exemple `web1` ou le
-nom du domaine), pas `www-data`. Avec cet utilisateur :
+The **PHP user** is the one that runs PHP for Nextcloud and owns its files. To find it:
 
 ```bash
-sudo -u <utilisateur> tar -xzf folderwatch-<version>.tar.gz -C /chemin/vers/nextcloud/custom_apps/
-sudo -u <utilisateur> php /chemin/vers/nextcloud/occ app:enable folderwatch
+stat -c %U /path/to/nextcloud/config/config.php      # Linux
 ```
 
-Extraire directement sous cet utilisateur évite tout `chown` ; si l'archive a été extraite par `root`, rendre les
-fichiers à l'utilisateur PHP (`chown -R <utilisateur>: …/folderwatch`) avant d'activer l'app. Si plusieurs versions de PHP
-coexistent (cas courant sur ces hébergements), lancer `occ` avec le binaire PHP du site.
+It is `www-data` on a standard Debian or Ubuntu installation, `apache` or `nginx` elsewhere. **On a Virtualmin or
+ISPConfig hosting it is the site user** (the user of the virtual domain, for example `web1` or the domain name),
+not `www-data`. With that user:
 
-À l'activation, deux tâches de fond sont enregistrées : l'envoi des alertes (au plus une fois par minute) et le
-nettoyage quotidien. En cas de mise à jour, `occ upgrade` applique les migrations de base de données.
+```bash
+sudo -u <user> tar -xzf folderwatch-<version>.tar.gz -C /path/to/nextcloud/custom_apps/
+sudo -u <user> php /path/to/nextcloud/occ app:enable folderwatch
+```
 
-### Ce que l'instance doit fournir
+Extracting directly as that user avoids any `chown`; if the archive was extracted by `root`, give the files back to
+the PHP user (`chown -R <user>: …/folderwatch`) before enabling the app. If several PHP versions coexist (common on
+such hostings), run `occ` with the PHP binary of the site.
 
-Trois points déterminent la fiabilité des alertes. Chacun est **vérifié et signalé** dans *Administration → Vue
-d'ensemble* (trois contrôles « Folder Watch : … ») et, avec les mêmes messages, en tête de la page d'administration de
-l'app :
+Enabling the app registers two background jobs: sending alerts (at most once a minute) and a daily clean-up. When
+updating, `occ upgrade` applies the database migrations.
 
-| Point | Pourquoi | Sans lui |
+### What the instance must provide
+
+Three points decide how reliable the alerts are. Each one is **checked and reported** in *Administration → Overview*
+(three "Folder Watch: …" checks) and, with the same messages, at the top of the administration page of the app:
+
+| Point | Why | Without it |
 |---|---|---|
-| **Tâches de fond en mode `cron`** (`occ background:cron` et un cron système, au plus toutes les 5 minutes) | les alertes partent par un job | en mode AJAX ou webcron elles ne partent que lorsque quelqu'un visite le site : en retard, voire jamais. Les utilisateurs voient un bandeau « alertes possiblement retardées » |
-| **Serveur e-mail de Nextcloud** configuré (*Paramètres de base → Serveur e-mail*) | le canal e-mail | pas d'e-mail : le canal est grisé pour les utilisateurs (raison affichée) et seules les notifications partent |
-| **`overwrite.cli.url`** dans `config.php`, adresse publique de l'instance | liens des alertes construites **hors d'une requête web** (ligne de commande, cron, scan), et référence pour juger l'hôte des requêtes web | l'e-mail part **sans lien** et un avertissement est écrit dans le journal, au plus une fois par jour |
+| **Background jobs in `cron` mode** (`occ background:cron` and a system cron, every 5 minutes at most) | alerts are sent by a job | in AJAX or webcron mode they leave only when someone visits the site: late, or never. Users see an "alerts may arrive late" banner |
+| **The Nextcloud e-mail server** configured (*Basic settings → Email server*) | the e-mail channel | no e-mail: the channel is greyed out for users (reason shown) and only notifications are sent |
+| **`overwrite.cli.url`** in `config.php`, the public address of the instance | links of alerts built **outside a web request** (command line, cron, scan), and the reference to judge the host of web requests | the e-mail goes out **without a link** and a warning is written to the log, at most once a day |
 
-À propos des liens : ils ont la forme `/index.php/f/<identifiant du fichier>`, **sans chemin** : ils ouvrent le
-fichier chez chaque destinataire, même s'il a renommé ou déplacé le dossier partagé de son côté. Ils sont **calculés
-au moment de l'événement, dans la requête web qui l'a provoqué**, puis **conservés avec l'événement** : l'e-mail les
-reprend tels quels, même si l'envoi a lieu plus tard par le cron. L'hôte de la requête n'est retenu que s'il est
-fiable : celui de `overwrite.cli.url` quand il est utilisable (ni vide ni local), à défaut le premier des
-`trusted_domains` (hors `localhost` et adresses de bouclage). Une requête arrivée par un autre nom (adresse interne,
-ancien domaine, domaine secondaire) voit son lien reconstruit sur `overwrite.cli.url`. Les événements sans requête
-web (ligne de commande, cron, scan) utilisent `overwrite.cli.url`. Sans adresse fiable, l'e-mail part sans lien
-plutôt qu'avec un lien inutilisable. Les notifications Nextcloud calculent les leurs à l'affichage.
+About links: they have the form `/index.php/f/<file id>`, **with no path**: they open the file for every recipient,
+even if they renamed or moved the shared folder on their side. They are **worked out when the event happens, in the
+web request that caused it**, then **kept with the event**: the e-mail uses them as they are, even if it is sent
+later by cron. The host of the request is kept only if it can be trusted: the host of `overwrite.cli.url` when that is
+usable (neither empty nor local), otherwise the first of `trusted_domains` (except `localhost` and loopback
+addresses). A request that came in through any other name (internal address, former domain, secondary domain) gets
+its link rebuilt on `overwrite.cli.url`. Events without a web request (command line, cron, scan) use
+`overwrite.cli.url`. With no trustworthy address, the e-mail goes out without a link rather than with a useless one.
+Nextcloud notifications make their links when they are shown.
 
-**Désinstallation.** `occ app:disable folderwatch` (réversible, les données restent) puis `occ app:remove
-folderwatch`. Les trois tables (`oc_folderwatch_watches`, `_queue`, `_sends`) sont **conservées** : Nextcloud
-exécute les étapes de désinstallation d'une app à chaque *désactivation*, donc un `DROP TABLE` effacerait tous les
-réglages dès qu'un administrateur coupe l'app une minute. Pour les supprimer définitivement :
-`DROP TABLE oc_folderwatch_queue, oc_folderwatch_sends, oc_folderwatch_watches;` puis
+**Uninstalling.** `occ app:disable folderwatch` (reversible, the data stays), then `occ app:remove folderwatch`. The
+three tables (`oc_folderwatch_watches`, `_queue`, `_sends`) are **kept**: Nextcloud runs the uninstall steps of an app
+on every *disable*, so a `DROP TABLE` would erase every setting as soon as an administrator turns the app off for a
+minute. To remove them for good:
+`DROP TABLE oc_folderwatch_queue, oc_folderwatch_sends, oc_folderwatch_watches;` then
 `DELETE FROM oc_migrations WHERE app = 'folderwatch';`.
 
-## Réglages d'administration
+## Administration settings
 
-*Paramètres d'administration → Surveillance de dossiers* (ou `occ config:app:set folderwatch …`) :
+*Administration settings → Folder Watch* (or `occ config:app:set folderwatch …`):
 
-| Réglage | Clé | Défaut |
+| Setting | Key | Default |
 |---|---|---|
-| Autoriser les alertes par e-mail | `mail_enabled` | oui |
-| Dossiers surveillables par utilisateur (1 à 1000) | `max_watches_per_user` | 50 |
-| Alertes par utilisateur et par heure (0 à 1000, 0 = illimité) | `max_sends_per_hour` | 20 |
-| Noms de fichiers ignorés, un motif `fnmatch` par ligne | `ignored_patterns` | `*.part`, `.~lock.*`, `~$*`, `.DS_Store`, `Thumbs.db` |
+| Allow alerts by e-mail | `mail_enabled` | yes |
+| Folders one user may watch (1 to 1000) | `max_watches_per_user` | 50 |
+| Alerts one user may receive per hour (0 to 1000, 0 = no limit) | `max_sends_per_hour` | 20 |
+| Ignored file names, one `fnmatch` pattern per line | `ignored_patterns` | `*.part`, `.~lock.*`, `~$*`, `.DS_Store`, `Thumbs.db` |
 
-Au-delà du plafond horaire, les alertes **attendent** dans la file et partent regroupées au prochain envoi
-possible : rien n'est jeté. Les valeurs invalides sont refusées sans rien enregistrer.
+Beyond the hourly limit, alerts **wait** in the queue and leave together at the next possible sending: nothing is
+dropped. Invalid values are refused without saving anything.
 
-## Commandes `occ`
+## `occ` commands
 
 ```bash
-occ folderwatch:list [--user=alice] [--output=json]        # tous les watches, état, éléments en attente
-occ folderwatch:add alice /Documents/À\ traiter \
+occ folderwatch:list [--user=alice] [--output=json]        # all watches, state, pending items
+occ folderwatch:add alice /Documents/To\ process \
     [--no-recursive] [--channel=mail,notification] [--events=created,modified,deleted,moved_in] \
-    [--frequency=immediate|hourly|daily] [--digest-hour=8]   # mise en place pour un client
-occ folderwatch:remove 12                                   # par identifiant
-occ folderwatch:flush                                       # envoie tout de suite, pratique pour tester
+    [--frequency=immediate|hourly|daily] [--digest-hour=8]   # set up for a user
+occ folderwatch:remove 12                                   # by id
+occ folderwatch:flush                                       # send now, handy to try a set-up
 ```
 
-`flush` ignore la période de calme et les heures de récapitulatif, **pas** le plafond horaire de chaque
-utilisateur. Une commande qui échoue rend un code de sortie non nul.
+`flush` ignores the quiet period and the digest hours, **not** the hourly limit of each user. A command that fails
+returns a non-zero exit code.
 
 ## API
 
-OCS, authentifiée, toujours limitée à l'utilisateur courant (`/ocs/v2.php/apps/folderwatch/api/v1`) :
+OCS, authenticated, always limited to the current user (`/ocs/v2.php/apps/folderwatch/api/v1`):
 
-| Route | Rôle |
+| Route | Purpose |
 |---|---|
-| `GET /watches` | liste |
-| `POST /watches` | crée (`fileId` **ou** `path`, plus les réglages) |
-| `GET /watches/status?fileId=` | ce dossier est-il surveillé ? |
-| `PATCH /watches/{id}` | modifie |
-| `DELETE /watches/{id}` | supprime |
-| `GET/PUT /settings` | « ignorer mes actions » |
-| `GET/PUT /admin/settings` | réglages d'instance, **administrateurs seulement** |
+| `GET /watches` | list |
+| `POST /watches` | create (`fileId` **or** `path`, plus the settings) |
+| `GET /watches/status?fileId=` | is this folder watched? |
+| `PATCH /watches/{id}` | modify |
+| `DELETE /watches/{id}` | delete |
+| `GET/PUT /settings` | "ignore my own actions" |
+| `GET/PUT /admin/settings` | instance settings, **administrators only** |
 
-La spécification OpenAPI est dans `openapi.json` (et `openapi-administration.json`), générée par
-`make openapi`.
+The OpenAPI specification is in `openapi.json` (and `openapi-administration.json`), generated by `make openapi`.
 
-## Comment ça marche
+## How it works
 
-### Repérer les dossiers : par identifiant, jamais par chemin
+### Finding folders: by id, never by path
 
-Un chemin change selon le point de vue (propriétaire, destinataire d'un partage, dossier d'équipe) et à chaque
-renommage ; un `file_id` non. Un watch est donc `(utilisateur, file_id)`.
+A path changes with the point of view (owner, share recipient, team folder) and with every rename; a `file_id` does
+not. A watch is therefore `(user, file_id)`.
 
-À chaque `NodeCreatedEvent`, `NodeWrittenEvent`, `NodeRenamedEvent` ou `NodeDeletedEvent`, le listener
-(`NodeEventsListener`) fait le minimum et **n'envoie rien** :
+On every `NodeCreatedEvent`, `NodeWrittenEvent`, `NodeRenamedEvent` or `NodeDeletedEvent`, the listener
+(`NodeEventsListener`) does the minimum and **sends nothing**:
 
-1. il ignore les chemins hors de `/<utilisateur>/files/…` (versions, corbeille, morceaux d'upload, `appdata_*`)
-   et les noms exclus ;
-2. il calcule la **chaîne des `file_id` ancêtres** du dossier parent en remontant la colonne `parent` du cache du
-   stockage du nœud (`AncestorResolver`, API publique `ICache`). Cette remontée ne dépend pas de la vue :
-   - un nœud atteint **par un partage** est relu depuis le **stockage du propriétaire**, dont le cache connaît
-     toute l'arborescence au-dessus du point de partage. Un propriétaire qui surveille un dossier *au-dessus* du
-     partage voit donc ce que fait le destinataire ;
-   - les **dossiers d'équipe** (groupfolders) et les stockages externes n'ont pas de propriétaire : leur propre
-     cache est remonté jusqu'à la racine du montage ;
-3. une requête SQL retrouve les watches dont le `file_id` est le **dossier parent** (récursif ou non) ou l'un de
-   ses **ancêtres** (récursif seulement) ;
-4. pour chaque candidat : l'événement est-il souscrit ? l'acteur est-il le surveillant (option « ignorer mes
-   actions ») ? le surveillant **voit-il encore** le dossier surveillé et le dossier concerné
-   (`getUserFolder($uid)->getFirstNodeById()`) ? — ce qui couvre les partages retirés et les droits changés, et
-   les ACL des dossiers d'équipe ;
-5. les lignes sont **mises en mémoire puis écrites en un seul lot après la réponse** (INSERT multi-lignes), si bien
-   qu'un dépôt de 500 fichiers ne ralentit pas la requête WebDAV (mesuré : aucune différence avec l'app désactivée).
-   Les résultats coûteux (chaîne d'ancêtres, candidats, droits) sont mémorisés par dossier pour la requête.
+1. it ignores paths outside `/<user>/files/…` (versions, trash, upload chunks, `appdata_*`) and excluded names;
+2. it works out the **chain of ancestor `file_id`s** of the parent folder by climbing the `parent` column of the cache
+   of the storage of the node (`AncestorResolver`, public `ICache` API). The climb does not depend on the view:
+   - a node reached **through a share** is read again from the **storage of the owner**, whose cache knows the whole
+     tree above the share point. An owner who watches a folder *above* the share therefore sees what the recipient
+     does;
+   - **team folders** (groupfolders) and external storages have no owner: their own cache is climbed up to the root
+     of the mount;
+3. one SQL query finds the watches whose `file_id` is the **parent folder** (recursive or not) or one of its
+   **ancestors** (recursive only);
+4. for each candidate: is the event subscribed? is the actor the watcher (option "ignore my own actions")? does the
+   watcher **still see** the watched folder and the folder concerned (`getUserFolder($uid)->getFirstNodeById()`)? This
+   covers removed shares, changed rights and the ACLs of team folders;
+5. the rows are **kept in memory and written in one batch after the response** (multi-row INSERT), so dropping 500
+   files does not slow the WebDAV request down (measured: no difference with the app disabled). Costly results
+   (ancestor chain, candidates, rights) are remembered per folder for the request.
 
-Ce que Nextcloud émet réellement, observé sur la 35 : un nouveau fichier ou dossier (PUT, MKCOL, upload par
-morceaux, copie) donne `Created` puis `Written` ; une réécriture, `Written` seul ; un déplacement ou renommage,
-`Renamed` ; une suppression ou mise à la corbeille, `Deleted` ; une restauration de la corbeille, `Touched`.
+What Nextcloud really emits, observed on 35: a new file or folder (PUT, MKCOL, chunked upload, copy) gives `Created`
+then `Written`; a rewrite, `Written` alone; a move or rename, `Renamed`; a deletion or move to the trash, `Deleted`; a
+restore from the trash, `Touched`.
 
-Conséquences :
+Consequences:
 
-- `Created` + `Written` d'un même fichier = **un seul** « ajouté » ; un fichier créé puis supprimé dans la même
-  requête ne laisse aucune trace ;
-- un **déplacement entrant** compte comme un ajout (« déplacé ici », inclus par défaut) ; un déplacement à
-  l'intérieur d'un arbre surveillé n'est **pas** une arrivée ; un **renommage dans le même dossier est ignoré** ;
-  un déplacement **sortant** est signalé comme « supprimé » pour les watches qui s'y abonnent ;
-- la restauration d'un élément depuis la corbeille ne déclenche pas d'alerte.
+- `Created` + `Written` of one file = **a single** "added"; a file created then deleted in the same request leaves no
+  trace;
+- a **move in** counts as an addition ("moved in", included by default); a move inside a watched tree is **not** an
+  arrival; a **rename in the same folder is ignored**; a move **out** is reported as "removed" for the watches that
+  subscribe to it;
+- restoring an item from the trash raises no alert.
 
-### Envoyer : un lot par dossier
+### Sending: one batch per folder
 
-Le job `SendAlertsJob` (au plus toutes les 60 s, donc à la cadence du cron) traite la file **par watch** :
+The `SendAlertsJob` job (every 60 s at most, so at the pace of cron) processes the queue **per watch**:
 
-- **Dès que possible** : on attend **2 minutes sans nouvel événement**, avec un plafond de **10 minutes** depuis le
-  plus ancien, pour qu'un dépôt massif donne une seule alerte.
-- **Récapitulatif horaire / quotidien** : envoi au passage de l'heure, ou de l'heure choisie dans le **fuseau de
-  l'utilisateur** (changements d'heure compris).
-- Les événements d'un même fichier sont fusionnés (créé puis modifié = ajouté ; créé puis supprimé = rien ;
-  supprimé puis recréé = modifié).
-- **Les accès sont revérifiés au moment de l'envoi** : dossier devenu inaccessible, fichier déjà supprimé…
-- **Liens** : repris de ceux conservés avec les événements (voir Installation) ; une ligne sans lien (plus anciennes,
-  ou événement hors requête web) reçoit celui que `overwrite.cli.url` permet, sinon l'e-mail part sans lien.
-  Un Nextcloud qui ne peut pas envoyer d'e-mail (serveur non configuré) ne tente pas d'en envoyer : la notification part.
-- Plafond horaire de l'administrateur, puis notification (`INotifier`) et e-mail (`IMailer` + `IEMailTemplate`).
-  Si **tous** les canaux échouent, les lignes restent pour le prochain passage ; si un seul échoue, le lot est
-  considéré comme envoyé (le canal perdu est journalisé) pour ne jamais créer de doublon.
-- La file est purgée après envoi ; les lignes de plus de 7 jours le sont de toute façon.
+- **As soon as possible**: it waits for **2 minutes without a new event**, with a cap of **10 minutes** from the
+  oldest, so that a mass drop gives a single alert.
+- **Hourly / daily digest**: sent at the turn of the hour, or at the hour chosen, in the **time zone of the user**
+  (daylight saving included).
+- The events of one file are merged (created then modified = added; created then removed = nothing; removed then
+  re-created = modified).
+- **Access is checked again when sending**: folder no longer reachable, file already deleted...
+- **Links**: taken from those kept with the events (see Installation); a line without a link (older ones, or an
+  event outside a web request) gets the one `overwrite.cli.url` allows, otherwise the e-mail goes out without a link.
+  A Nextcloud that cannot send e-mail (server not configured) does not try: the notification goes out.
+- The hourly limit of the administrator, then the notification (`INotifier`) and the e-mail (`IMailer` +
+  `IEMailTemplate`). If **all** channels fail, the rows stay for the next run; if only one fails, the batch is
+  considered sent (the lost channel is logged) so that no duplicate is ever created.
+- The queue is purged after sending; rows older than 7 days are purged anyway.
 
-### Nettoyer
+### Cleaning up
 
-- **Dossier à la corbeille** ou **partage retiré** : le watch est **suspendu** (aucune alerte) et **revit tout
-  seul** à la restauration ou au partage retrouvé. Ce n'est pas détecté sur l'événement de suppression, qui est le
-  même pour la corbeille et la suppression définitive, mais par le job `CleanupJob` (quotidien) et à l'envoi.
-- **Supprimé pour de bon** (l'identifiant a disparu du cache de fichiers) : le watch est retiré après 24 h.
-- **Inaccessible depuis 30 jours** (durée de rétention par défaut de la corbeille) : retiré.
-- **Compte supprimé** (`UserDeletedEvent`) : watches, alertes en attente et journal d'envois disparaissent.
+- **Folder in the trash** or **share removed**: the watch is **suspended** (no alert) and **comes back by itself** when
+  the folder is restored or the share is back. This is not detected on the deletion event, which is the same for the
+  trash and for permanent deletion, but by the `CleanupJob` job (daily) and when sending.
+- **Deleted for good** (the id is gone from the file cache): the watch is removed after 24 h.
+- **Unreachable for 30 days** (the default retention of the trash): removed.
+- **Deleted account** (`UserDeletedEvent`): watches, pending alerts and the send log are removed.
 
-## Limites connues
+## Known limitations
 
-- **Stockages externes modifiés hors de Nextcloud** (FTP, SMB, disque local) : aucun événement n'est émis tant
-  qu'un `occ files:scan` n'a pas vu le changement, donc aucune alerte. Planifier ce scan pour les points de
-  montage concernés ; une option d'administration qui le lancerait par les watches concernés n'est pas
-  implémentée (les scans émettent d'autres événements, `NodeAddedToCache`, qui pourraient l'alimenter plus tard).
-- **Un watch ne franchit pas un point de montage.** Surveiller un dossier qui *contient* un partage reçu, un
-  dossier d'équipe ou un stockage externe ne remonte pas ce qui se passe dans ce montage : surveillez le dossier
-  partagé lui-même. Surveiller le dossier partagé, la racine d'un dossier d'équipe, ou un dossier au-dessus du
-  point de partage côté propriétaire fonctionne.
-- **Les tâches de fond sont indispensables** (voir Installation).
-- **Sans `overwrite.cli.url` utilisable**, les alertes provoquées hors d'une requête web (scan, ligne de commande)
-  partent sans lien dans l'e-mail, et celles d'une requête web aussi si son hôte n'est pas le premier des
-  `trusted_domains`.
-- Les accès se vérifient au niveau du dossier : un droit retiré sur un fichier précis d'un dossier lisible n'est
-  contrôlé qu'à l'envoi (le fichier doit être lisible pour apparaître).
-- Les noms qui apparaissent dans un lot sont ceux de l'événement ; un fichier renommé avant l'envoi garde son nom
-  d'origine dans le message (le lien, lui, suit le fichier).
+- **External storages changed outside Nextcloud** (FTP, SMB, local disk): no event is emitted until an
+  `occ files:scan` has seen the change, so no alert. Schedule that scan for the mount points concerned; an
+  administration option that would run it for the watches concerned is not implemented (scans emit other events,
+  `NodeAddedToCache`, which could feed it later).
+- **A watch does not cross a mount point.** Watching a folder that *contains* a received share, a team folder or an
+  external storage does not report what happens inside that mount: watch the shared folder itself. Watching the
+  shared folder, the root of a team folder, or a folder above the share point on the owner's side works.
+- **Background jobs are essential** (see Installation).
+- **Without a usable `overwrite.cli.url`**, alerts raised outside a web request (scan, command line) go out without a
+  link in the e-mail, and so do those of a web request whose host is not the first of `trusted_domains`.
+- Access is checked at folder level: a right removed on a specific file of a readable folder is only checked at
+  sending time (the file must be readable to appear).
+- The names that appear in a batch are those of the event; a file renamed before sending keeps its original name in
+  the message (the link, however, follows the file).
 
-## Développer
+## Development
 
 ```bash
 make dev            # Nextcloud + MariaDB + Mailpit + cron, http://localhost:8080 (admin/admin), Mailpit :8025
-NC_VERSION=33 NC_PORT=8133 MAILPIT_PORT=8125 COMPOSE_PROJECT_NAME=fw33 make dev   # une autre version, à côté
+NC_VERSION=33 NC_PORT=8133 MAILPIT_PORT=8125 COMPOSE_PROJECT_NAME=fw33 make dev   # another version, side by side
 make build          # frontend → js/ (Vue 3, @nextcloud/vue, Vite)
-make test           # PHPUnit, vitest, PHPUnit dans le conteneur, parcours bout en bout
-make check          # cs-fixer, Psalm, ESLint, vue-tsc, tests unitaires (sans l'instance de dev)
+make test           # PHPUnit, vitest, PHPUnit in the container, end-to-end run
+make check          # cs-fixer, Psalm, ESLint, vue-tsc, unit tests (without the dev instance)
 make appstore       # build/folderwatch-<version>.tar.gz
 make help
 ```
 
-| Outil | Ce qu'il vérifie |
+| Tool | What it checks |
 |---|---|
-| `tests/Unit` (PHPUnit) | matching, tampon, planification, agrégation, textes, envoi, nettoyage, commandes, `info.xml`, traductions |
-| `tests/Integration` (PHPUnit **dans le conteneur**) | vrais utilisateurs, partages, groupfolders, corbeille, notifications rendues par le vrai `Notifier`, e-mails dans Mailpit |
-| `tests/integration.sh` | le même parcours qu'un humain : WebDAV (`curl -T`), `occ`, API OCS des notifications, Mailpit |
-| `tests-js` (vitest) | actions de Fichiers, paramètres personnels et d'administration |
-| Psalm niveau 3, php-cs-fixer (`nextcloud/coding-standard`), ESLint (`@nextcloud/eslint-config`), `vue-tsc` | qualité statique |
+| `tests/Unit` (PHPUnit) | matching, buffer, scheduling, aggregation, texts, sending, clean-up, commands, `info.xml`, translations |
+| `tests/Integration` (PHPUnit **in the container**) | real users, shares, groupfolders, trash, notifications rendered by the real `Notifier`, e-mails in Mailpit |
+| `tests/integration.sh` | the same run as a human: WebDAV (`curl -T`), `occ`, the OCS notifications API, Mailpit |
+| `tests-js` (vitest) | Files actions, personal and administration settings |
+| Psalm level 3, php-cs-fixer (`nextcloud/coding-standard`), ESLint (`@nextcloud/eslint-config`), `vue-tsc` | static quality |
 
-Arborescence : `lib/Listener` (événements), `lib/Service` (matching, tampon, réglages, nettoyage), `lib/Alert`
-(agrégation, planification, textes, canaux, envoi), `lib/Db` (entités et mappers), `lib/Controller` (OCS),
-`lib/Command` (occ), `lib/Settings`, `src` (Vue 3), `l10n` (le JSON est la source, `python3 tools/gen_l10n.py` en
-tire le `.js`), `tools` (données de démonstration et captures d'écran).
+Layout: `lib/Listener` (events), `lib/Service` (matching, buffer, settings, clean-up), `lib/Alert` (aggregation,
+scheduling, texts, channels, sending), `lib/Db` (entities and mappers), `lib/Controller` (OCS), `lib/Command` (occ),
+`lib/Settings`, `src` (Vue 3), `l10n` (the JSON is the source, `python3 tools/gen_l10n.py` derives the `.js`), `tools`
+(demo data and screenshots).
 
-### Choix à connaître
+The screenshots of this page and of the App Store listing are regenerated with `tools/seed-demo.sh fr|en` then
+`node tools/screenshots.mjs fr|en`.
 
-- Défauts : « déplacé ici » est coché avec « ajouté », puisqu'un déplacement entrant est une création du point de
-  vue du dossier.
-- Pas d'étape de désinstallation qui supprime les tables (voir Désinstallation).
-- Les entités marquent leurs champs à défaut dans le constructeur : le setter d'une entité Nextcloud ignore une
-  valeur égale à celle de la propriété, et l'INSERT retomberait alors sur le défaut de la colonne.
-- `#[\Override]` n'est pas utilisé (PHP 8.3) : l'app supporte PHP 8.2.
+### Choices worth knowing
 
-### Publier
+- Defaults: "moved in" is ticked along with "added", since a move in is a creation from the point of view of the
+  folder.
+- No uninstall step that deletes the tables (see Uninstalling).
+- Entities mark their default fields in the constructor: the setter of a Nextcloud entity ignores a value equal to
+  the one of the property, and the INSERT would then fall back on the default of the column.
+- `#[\Override]` is not used (PHP 8.3): the app supports PHP 8.2.
+- Labels of the frequency selector are kept short (24 characters at most): the selector is only as wide as a column
+  of the settings page, and a long label ends in an ellipsis on a phone. A unit test guards it.
 
-`make appstore` construit l'archive (et refuse de le faire si `appinfo/info.xml` contient encore une URL
-provisoire). Pour la publier sur l'App Store, la signer avec le certificat de développeur :
+### Publishing
+
+`make appstore` builds the archive. To publish it on the App Store, sign it with the developer certificate:
 
 ```bash
 make appstore-sign KEY=~/.nextcloud/certificates/folderwatch.key CRT=~/.nextcloud/certificates/folderwatch.crt

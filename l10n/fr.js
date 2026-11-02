@@ -71,7 +71,7 @@ OC.L10N.register(
     "Nextcloud notification" : "Notification Nextcloud",
     "E-mail" : "E-mail",
     "As soon as possible" : "Dès que possible",
-    "Hourly digest" : "Récapitulatif toutes les heures",
+    "Hourly digest" : "Récapitulatif horaire",
     "Daily digest" : "Récapitulatif quotidien",
     "Get a notification or an e-mail when something is added or changed in the folders you choose." : "Recevez une notification ou un e-mail quand un élément est ajouté ou modifié dans les dossiers que vous choisissez.",
     "Ignore my own actions" : "Ignorer mes propres actions",

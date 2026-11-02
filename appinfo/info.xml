@@ -41,7 +41,7 @@ Setup checks in *Administration → Overview* report these three points.
 
 ## Links
 
-* [README](https://github.com/feixeth/folderwatch#readme) (in French)
+* [README](https://github.com/feixeth/folderwatch#readme)
 * [Changelog](https://github.com/feixeth/folderwatch/blob/main/CHANGELOG.md)
 * [Report an issue](https://github.com/feixeth/folderwatch/issues)]]></description>
 	<description lang="fr"><![CDATA[Nextcloud ne prévient pas quand un fichier arrive dans un dossier précis. Folder Watch le fait : vous choisissez les dossiers, et vous recevez une notification Nextcloud et/ou un e-mail quand un élément y est ajouté, modifié, supprimé ou déplacé.
@@ -75,7 +75,7 @@ Des contrôles dans *Administration → Vue d'ensemble* signalent ces trois poin
 
 ## Liens
 
-* [README](https://github.com/feixeth/folderwatch#readme)
+* [README](https://github.com/feixeth/folderwatch/blob/main/README.fr.md)
 * [Journal des modifications](https://github.com/feixeth/folderwatch/blob/main/CHANGELOG.md) (en anglais)
 * [Signaler un problème](https://github.com/feixeth/folderwatch/issues)]]></description>
 	<version>1.0.2</version>
@@ -83,8 +83,8 @@ Des contrôles dans *Administration → Vue d'ensemble* signalent ces trois poin
 	<author homepage="https://zedd.fr">ZEDD</author>
 	<namespace>FolderWatch</namespace>
 	<documentation>
-		<user>https://github.com/feixeth/folderwatch#ce-que-voit-lutilisateur</user>
-		<admin>https://github.com/feixeth/folderwatch#ce-que-linstance-doit-fournir</admin>
+		<user>https://github.com/feixeth/folderwatch#what-users-see</user>
+		<admin>https://github.com/feixeth/folderwatch#what-the-instance-must-provide</admin>
 	</documentation>
 	<category>files</category>
 	<category>organization</category>

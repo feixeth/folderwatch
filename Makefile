@@ -102,7 +102,7 @@ appstore: ## Archive build/folderwatch-<version>.tar.gz prête à être signée
 	@xmllint --noout appinfo/info.xml
 	$(MAKE) build openapi
 	rm -rf $(BUILD_DIR)/appstore && mkdir -p $(PACKAGE_DIR)
-	rsync -a --exclude='*.map' appinfo lib l10n img js templates openapi.json openapi-administration.json openapi-full.json LICENSE LICENSES README.md CHANGELOG.md $(PACKAGE_DIR)/
+	rsync -a --exclude='*.map' appinfo lib l10n img js templates openapi.json openapi-administration.json openapi-full.json LICENSE LICENSES README.md README.fr.md CHANGELOG.md $(PACKAGE_DIR)/
 	@# rien de ce qui sert au développement ne part dans l'archive
 	@bad=$$(find $(PACKAGE_DIR) \( -name node_modules -o -name tests -o -name tests-js -o -name src -o -name vendor -o -name '*.map' -o -name '.git*' \) | head -5); [ -z "$$bad" ] || { echo "fichiers de dev dans l'archive : $$bad"; exit 1; }
 	tar -czf $(TARBALL) -C $(BUILD_DIR)/appstore $(APP_ID)

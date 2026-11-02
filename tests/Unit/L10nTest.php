@@ -108,4 +108,17 @@ class L10nTest extends TestCase {
 			$this->assertStringContainsString(json_encode($key, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $before, $key);
 		}
 	}
+
+	/**
+	 * The frequency selector of a watch is about as wide as a column of the settings page, and a phone is narrower
+	 * still: a long label ends in an ellipsis there ("Récapitulatif tout…les heures"). Keep them short.
+	 */
+	public function testTheFrequencyLabelsStayShortEnoughForTheSelector(): void {
+		$translations = $this->translations();
+		foreach (['As soon as possible', 'Hourly digest', 'Daily digest'] as $label) {
+			$this->assertLessThanOrEqual(24, mb_strlen($label), $label);
+			$this->assertArrayHasKey($label, $translations, $label);
+			$this->assertLessThanOrEqual(24, mb_strlen((string)$translations[$label]), $translations[$label]);
+		}
+	}
 }
