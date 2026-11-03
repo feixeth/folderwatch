@@ -1,6 +1,6 @@
 {
 	"name": "folderwatch",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"private": true,
 	"description": "Per-folder alerts (notification and e-mail) for Nextcloud",
 	"license": "AGPL-3.0-or-later",

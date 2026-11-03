@@ -11,12 +11,19 @@ NODE_IMAGE ?= node:24-slim
 BUILD_DIR := build
 PACKAGE_DIR := $(BUILD_DIR)/appstore/$(APP_ID)
 TARBALL := $(BUILD_DIR)/$(APP_ID)-$(VERSION).tar.gz
+# The archive is packed by GNU tar in a Linux container, never by the tar of this machine: the tar of macOS adds
+# AppleDouble entries ("._folderwatch", "folderwatch/._README.md") for extended attributes, hides them when it lists
+# an archive, and Nextcloud then refuses the app ("Extracted app folderwatch has more than 1 folder").
+# Any Debian-based image with GNU tar will do.
+TAR_IMAGE ?= $(NODE_IMAGE)
+PACK = docker run --rm --user "$$(id -u):$$(id -g)" -v "$(CURDIR)/$(BUILD_DIR)/appstore:/src:ro" -v "$(CURDIR)/$(BUILD_DIR):/out" $(TAR_IMAGE) \
+	sh -c 'tar -C /src --no-xattrs --no-acls --no-selinux --owner=0 --group=0 --numeric-owner --sort=name --exclude="._*" --exclude=.DS_Store -cf - $(APP_ID) | gzip -9n > /out/$(notdir $(TARBALL))'
 
 .DEFAULT_GOAL := help
 .PHONY: help dev dev-down dev-reset occ build watch \
 	test test-unit test-js test-integration test-e2e \
 	lint lint-php lint-js typecheck psalm cs-fix openapi check \
-	appstore appstore-sign clean
+	appstore appstore-sign appstore-signature check-package check-archive test-install clean
 
 help: ## Cette aide
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | column -t -s "$$(printf '\t')"
@@ -102,15 +109,24 @@ appstore: ## Archive build/folderwatch-<version>.tar.gz prête à être signée
 	@xmllint --noout appinfo/info.xml
 	$(MAKE) build openapi
 	rm -rf $(BUILD_DIR)/appstore && mkdir -p $(PACKAGE_DIR)
-	rsync -a --exclude='*.map' appinfo lib l10n img js templates openapi.json openapi-administration.json openapi-full.json LICENSE LICENSES README.md README.fr.md CHANGELOG.md $(PACKAGE_DIR)/
+	rsync -a --exclude='*.map' --exclude='._*' --exclude='.DS_Store' appinfo lib l10n img js templates openapi.json openapi-administration.json openapi-full.json LICENSE LICENSES README.md README.fr.md CHANGELOG.md $(PACKAGE_DIR)/
 	@# rien de ce qui sert au développement ne part dans l'archive
 	@bad=$$(find $(PACKAGE_DIR) \( -name node_modules -o -name tests -o -name tests-js -o -name src -o -name vendor -o -name '*.map' -o -name '.git*' \) | head -5); [ -z "$$bad" ] || { echo "fichiers de dev dans l'archive : $$bad"; exit 1; }
-	tar -czf $(TARBALL) -C $(BUILD_DIR)/appstore $(APP_ID)
+	$(MAKE) check-package
+	$(PACK)
+	$(MAKE) check-archive
 	@echo "$(TARBALL)  ($$(du -h $(TARBALL) | cut -f1))"
 	@shasum -a 256 $(TARBALL)
 
+check-package: ## Le dossier à emballer ne contient ni ._* ni .DS_Store (avant de signer le code)
+	python3 -I tools/check-archive.py $(PACKAGE_DIR) --app $(APP_ID)
+
+check-archive: ## L'archive ne contient que folderwatch/, ni ._* ni .DS_Store (lue avec Python tarfile, avant toute signature)
+	python3 -I tools/check-archive.py $(TARBALL) --app $(APP_ID)
+
 appstore-sign: appstore ## Signe l'archive : make appstore-sign KEY=app.key CRT=app.crt
 	@[ -n "$(KEY)" ] && [ -n "$(CRT)" ] || { echo "usage : make appstore-sign KEY=<clé privée> CRT=<certificat du développeur>"; exit 1; }
+	$(MAKE) check-package
 	$(COMPOSE) exec -T nextcloud sh -c 'rm -rf /tmp/sign && mkdir -p /tmp/sign'
 	docker cp $(PACKAGE_DIR) $$($(COMPOSE) ps -q nextcloud):/tmp/sign/$(APP_ID)
 	docker cp $(KEY) $$($(COMPOSE) ps -q nextcloud):/tmp/sign/app.key
@@ -119,8 +135,22 @@ appstore-sign: appstore ## Signe l'archive : make appstore-sign KEY=app.key CRT=
 	$(OCC) integrity:sign-app --privateKey=/tmp/sign/app.key --certificate=/tmp/sign/app.crt --path=/tmp/sign/$(APP_ID)
 	docker cp $$($(COMPOSE) ps -q nextcloud):/tmp/sign/$(APP_ID)/appinfo/signature.json $(PACKAGE_DIR)/appinfo/signature.json
 	$(COMPOSE) exec -T nextcloud rm -rf /tmp/sign
-	tar -czf $(TARBALL) -C $(BUILD_DIR)/appstore $(APP_ID)
+	$(MAKE) check-package
+	$(PACK)
+	$(MAKE) check-archive
 	@echo "Archive signée : $(TARBALL)"
+
+appstore-signature: check-archive ## Signature de release : make appstore-signature KEY=app.key CRT=app.crt (refuse une archive qui n'est pas saine)
+	@[ -n "$(KEY)" ] && [ -n "$(CRT)" ] || { echo "usage : make appstore-signature KEY=<clé privée> CRT=<certificat du développeur>"; exit 1; }
+	openssl dgst -sha512 -sign $(KEY) $(TARBALL) | openssl base64 > $(TARBALL).signature.b64
+	@openssl x509 -in $(CRT) -noout -pubkey > $(BUILD_DIR)/.pub.pem && openssl base64 -d -in $(TARBALL).signature.b64 -out $(BUILD_DIR)/.release.sig \
+		&& openssl dgst -sha512 -verify $(BUILD_DIR)/.pub.pem -signature $(BUILD_DIR)/.release.sig $(TARBALL); status=$$?; rm -f $(BUILD_DIR)/.pub.pem $(BUILD_DIR)/.release.sig; [ $$status -eq 0 ]
+	@shasum -a 256 $(TARBALL)
+	@cat $(TARBALL).signature.b64
+
+test-install: check-archive ## Installe l'archive dans un Nextcloud propre comme l'App Store : make test-install KEY=… CRT=… [NC_VERSION=33]
+	@[ -n "$(KEY)" ] && [ -n "$(CRT)" ] || { echo "usage : make test-install KEY=<clé privée> CRT=<certificat du développeur> [NC_VERSION=35]"; exit 1; }
+	bash tools/test-install.sh $(TARBALL) $(KEY) $(CRT) $${NC_VERSION:-35}
 
 clean: ## Supprime build/ et js/
 	rm -rf $(BUILD_DIR) js

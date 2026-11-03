@@ -9,6 +9,25 @@ All notable changes to Folder Watch are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## 1.0.3 - 2026-11-03
+
+Fix release archive packaging. No change to the code of the app.
+
+### Fixed
+
+- The release archive of 1.0.2 held `._folderwatch` next to `folderwatch` (AppleDouble entries added by the `tar` of
+  macOS, which hides them when it lists an archive), so Nextcloud refused to install it from the App Store with
+  "Extracted app folderwatch has more than 1 folder". The archive is now packed by GNU tar in a Linux container, with
+  no extended attributes, `._*` or `.DS_Store`, in a fixed order and with root as owner.
+
+### Added
+
+- `make appstore`, `appstore-sign` and `appstore-signature` check the folder and the archive with Python's `tarfile`
+  before any signature (`tools/check-archive.py`): the root must hold only `folderwatch/`, with no `._*`,
+  `.DS_Store` or `__MACOSX` anywhere.
+- `make test-install` installs the archive in a clean Nextcloud through `OC\Installer`, as the App Store does
+  (certificate chain, signature of release, download, extraction), then runs `integrity:check-app`.
+
 ## 1.0.2 - 2026-11-02
 
 ### Fixed
