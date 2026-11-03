@@ -55,7 +55,7 @@ describe('file actions', () => {
 			expect(indicatorAction.enabled?.(context([folder(11)]))).toBe(false)
 		})
 
-		it('offers to stop on a watched folder, and shows the indicator', () => {
+		it('offers to stop on a watched folder, and shows the watched folder action', () => {
 			expect(watchAction.enabled?.(context([folder(10)]))).toBe(false)
 			expect(unwatchAction.enabled?.(context([folder(10)]))).toBe(true)
 			expect(indicatorAction.enabled?.(context([folder(10)]))).toBe(true)
@@ -150,12 +150,14 @@ describe('file actions', () => {
 		})
 	})
 
-	describe('indicator', () => {
-		it('renders an eye with an accessible name', async () => {
-			const element = (await indicatorAction.renderInline?.(context([folder(10)]) as never)) as HTMLElement
-			expect(element.getAttribute('role')).toBe('img')
-			expect(element.getAttribute('aria-label')).toBeTruthy()
-			expect(element.querySelector('svg')).not.toBeNull()
+	describe('watched folder action', () => {
+		it('is one labelled inline action, with no second icon drawn next to the sharing button', () => {
+			expect(indicatorAction.inline?.(context([folder(10)]) as never)).toBe(true)
+			expect(indicatorAction.renderInline).toBeUndefined()
+			expect(indicatorAction.displayName(context([folder(10)]) as never)).toBe('Watched folder')
+			// the menu of a narrow screen shows the title in place of the name: it must stay short
+			expect(indicatorAction.title).toBeUndefined()
+			expect(indicatorAction.iconSvgInline(context([folder(10)]) as never)).toContain('<svg')
 		})
 
 		it('opens the personal settings when clicked', async () => {

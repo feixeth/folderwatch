@@ -47,7 +47,6 @@ OC.L10N.register(
     "You no longer watch \"{name}\"." : "Vous ne surveillez plus « {name} ».",
     "Could not stop watching this folder." : "Impossible d'arrêter la surveillance de ce dossier.",
     "Watched folder" : "Dossier surveillé",
-    "You get alerts for this folder. Click to manage." : "Vous recevez des alertes pour ce dossier. Cliquez pour gérer.",
     "Choose a folder to watch" : "Choisir un dossier à surveiller",
     "Watch \"{name}\"" : "Surveiller « {name} »",
     "Unavailable folder" : "Dossier indisponible",

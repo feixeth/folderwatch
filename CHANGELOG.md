@@ -9,6 +9,18 @@ All notable changes to Folder Watch are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## 1.0.4 - 2026-11-03
+
+### Fixed
+
+- A watched folder no longer shows two eye icons in the Files list. The icon-only indicator next to the sharing
+  button is gone; the labelled "Watched folder" action stays, visible without hovering, and opens the settings.
+  On a narrow screen, where inline actions are hidden, it stays reachable from the "…" menu under the same name.
+
+### Changed
+
+- Updated the Files screenshots of the README and the App Store listing.
+
 ## 1.0.3 - 2026-11-03
 
 Fix release archive packaging. No change to the code of the app.

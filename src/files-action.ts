@@ -95,11 +95,10 @@ export const unwatchAction: IFileAction = {
 	},
 }
 
-/** The eye shown in the row of a watched folder; clicking it opens the settings. */
+/** The labelled action shown in the row of a watched folder; it opens the settings. */
 export const indicatorAction: IFileAction = {
 	id: INDICATOR_ID,
 	displayName: () => t('Watched folder'),
-	title: () => t('You get alerts for this folder. Click to manage.'),
 	iconSvgInline: () => eyeSvg,
 	order: 10,
 
@@ -109,15 +108,6 @@ export const indicatorAction: IFileAction = {
 	},
 
 	inline: () => true,
-
-	async renderInline() {
-		const icon = document.createElement('span')
-		icon.className = 'folderwatch-indicator'
-		icon.setAttribute('role', 'img')
-		icon.setAttribute('aria-label', t('Watched folder'))
-		icon.innerHTML = eyeSvg
-		return icon
-	},
 
 	async exec() {
 		window.location.assign(generateUrl('/settings/user/folderwatch'))

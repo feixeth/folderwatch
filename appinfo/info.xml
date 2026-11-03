@@ -78,7 +78,7 @@ Des contrôles dans *Administration → Vue d'ensemble* signalent ces trois poin
 * [README](https://github.com/feixeth/folderwatch/blob/main/README.fr.md)
 * [Journal des modifications](https://github.com/feixeth/folderwatch/blob/main/CHANGELOG.md) (en anglais)
 * [Signaler un problème](https://github.com/feixeth/folderwatch/issues)]]></description>
-	<version>1.0.3</version>
+	<version>1.0.4</version>
 	<licence>agpl</licence>
 	<author homepage="https://zedd.fr">ZEDD</author>
 	<namespace>FolderWatch</namespace>
